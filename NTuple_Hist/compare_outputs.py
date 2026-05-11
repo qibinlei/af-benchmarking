@@ -9,9 +9,9 @@ Usage:
         --eventloop event_loop_noarrays_output_hist.root \\
         --fastframes /srv/output/histograms.root
 
-FastFrames histogram name: FastFrames uses the convention
-{sample}_{region}_{variable}_{systematic}, so for the default BNL config
-the histogram is "example_FS_Muon_ph_pt_NOSYS". Override with
+FastFrames histogram name: FastFrames stores histograms under a
+systematic directory (e.g. "NOSYS/"), so for the default BNL config
+the histogram path is "NOSYS/example_FS_Muon_ph_pt_NOSYS". Override with
 --fastframes-hist if your config differs.
 
 Key difference to look for: coffea and eventloop apply an event-level
@@ -30,14 +30,30 @@ ROOT.gStyle.SetOptStat(0)
 ROOT.gStyle.SetOptTitle(0)
 
 
+def _list_keys_recursive(obj, prefix=""):
+    """Return a flat list of key paths, descending into TDirectory objects."""
+    keys = []
+    for k in obj.GetListOfKeys():
+        full = f"{prefix}{k.GetName()}"
+        keys.append(full)
+        obj2 = obj.Get(k.GetName())
+        if obj2 and hasattr(obj2, "GetListOfKeys"):
+            keys.extend(_list_keys_recursive(obj2, prefix=f"{full}/"))
+    return keys
+
+
 def load_th1(path, name):
-    """Load a TH1 from a ROOT file, detached from the file."""
+    """Load a TH1 from a ROOT file, detached from the file.
+
+    name may be a slash-separated path into subdirectories,
+    e.g. "NOSYS/example_FS_Muon_ph_pt_NOSYS".
+    """
     f = ROOT.TFile.Open(path, "READ")
     if not f or f.IsZombie():
         raise OSError(f"Cannot open {path}")
     h = f.Get(name)
     if not h:
-        keys = [k.GetName() for k in f.GetListOfKeys()]
+        keys = _list_keys_recursive(f)
         raise KeyError(f"{name!r} not found in {path}.\nAvailable keys: {keys}")
     h = h.Clone()
     h.SetDirectory(0)
@@ -94,8 +110,8 @@ def main():
     )
     parser.add_argument("--fastframes", required=True, help="fastframes output ROOT file")
     parser.add_argument(
-        "--fastframes-hist", default="example_FS_Muon_ph_pt_NOSYS", metavar="NAME",
-        help="histogram name in fastframes ROOT file (default: example_FS_Muon_ph_pt_NOSYS)",
+        "--fastframes-hist", default="NOSYS/example_FS_Muon_ph_pt_NOSYS", metavar="NAME",
+        help="histogram name in fastframes ROOT file (default: NOSYS/example_FS_Muon_ph_pt_NOSYS)",
     )
     parser.add_argument(
         "--plot", default="comparison.pdf", metavar="PATH",
