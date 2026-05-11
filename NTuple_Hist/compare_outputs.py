@@ -11,7 +11,7 @@ Usage:
 
 FastFrames histogram name: FastFrames stores histograms under a
 systematic directory (e.g. "NOSYS/"), so for the default BNL config
-the histogram path is "NOSYS/example_FS_Muon_ph_pt_NOSYS". Override with
+the histogram path is "NOSYS/ph_pt_Muon". Override with
 --fastframes-hist if your config differs.
 
 Key difference to look for: coffea and eventloop apply an event-level
@@ -110,8 +110,8 @@ def main():
     )
     parser.add_argument("--fastframes", required=True, help="fastframes output ROOT file")
     parser.add_argument(
-        "--fastframes-hist", default="NOSYS/example_FS_Muon_ph_pt_NOSYS", metavar="NAME",
-        help="histogram name in fastframes ROOT file (default: NOSYS/example_FS_Muon_ph_pt_NOSYS)",
+        "--fastframes-hist", default="NOSYS/ph_pt_Muon", metavar="NAME",
+        help="histogram name in fastframes ROOT file (default: NOSYS/ph_pt_Muon)",
     )
     parser.add_argument(
         "--plot", default="comparison.pdf", metavar="PATH",
