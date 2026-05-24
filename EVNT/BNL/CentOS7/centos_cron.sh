@@ -5,7 +5,7 @@ readonly log_base="/atlasgpfs01/usatlas/data/qlei/logs/EVNT_centos7_batch"
 readonly log_output="log.generate"
 readonly job_dir="/usatlas/u/qlei/test/EVNT/centos"
 readonly AF_BENCH_DIR="/usatlas/u/qlei/AF-Benchmarking"
-readonly sub_file="${AF_BENCH_DIR}/EVNT/BNL/CentOS7/evnt_centos.sub"
+readonly CONDOR_LOG_DIR="/usatlas/u/qlei/batch_output_files/evnt/centos"
 
 readonly pixi_job="evnt"
 readonly pixi_log_type="evnt"
@@ -28,7 +28,7 @@ fi
 cd "${job_dir}" || { echo "ERROR: Could not cd into ${job_dir}"; exit 1; }
 echo "Submitting job from: $(pwd)"
 
-submit_out=$(condor_submit "${sub_file}")
+submit_out=$(bash "${AF_BENCH_DIR}/EVNT/BNL/CentOS7/submit.sh")
 echo "${submit_out}"
 
 # Extract the cluster ID from condor_submit output
@@ -39,10 +39,7 @@ if [ -z "${cluster_id}" ]; then
 fi
 echo "Cluster ID: ${cluster_id}"
 
-# Extract the log path template from the .sub file and expand macros
-log_template=$(grep -i '^log' "${sub_file}" | awk '{print $NF}')
-condor_log="${log_template//\$(Cluster)/${cluster_id}}"
-condor_log="${condor_log//\$(Process)/0}"
+condor_log="${CONDOR_LOG_DIR}/evnt_CentOS7.${cluster_id}.0.log"
 
 echo "Waiting for job to complete (log: ${condor_log})..."
 condor_wait "${condor_log}" || { echo "ERROR: condor_wait failed"; exit 1; }

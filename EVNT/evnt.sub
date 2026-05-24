@@ -1,0 +1,17 @@
+Universe = vanilla
+
+Executable = $(AF_BENCH_DIR)/EVNT/run_evnt.sh
+
+Output = $(CONDOR_LOG_DIR)/evnt_$(OS).$(Cluster).$(Process).out
+Error  = $(CONDOR_LOG_DIR)/evnt_$(OS).$(Cluster).$(Process).err
+Log    = $(CONDOR_LOG_DIR)/evnt_$(OS).$(Cluster).$(Process).log
+
+# SITE and OS are read by run_evnt.sh to source the correct config files.
+# JOB_CLEANUP_DIR is the BNL working directory to rm -rf after the job;
+# empty string disables cleanup (UC).
+environment = "SITE=$(SITE) OS=$(OS) JOB_CLEANUP_DIR=$(JOB_CLEANUP_DIR)"
+
+request_memory = $(REQUEST_MEMORY)
+request_cpus = 1
+
+Queue 1
